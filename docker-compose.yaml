@@ -13,7 +13,7 @@ services:
     dns:
       - 8.8.8.8
     volumes:
-      - ./app:/var/www/
+      - ./:/var/www/
     command: "symfony server:start"
     networks:
       - app-net

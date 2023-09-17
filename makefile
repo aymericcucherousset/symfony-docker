@@ -2,12 +2,14 @@
 DOCKER = docker
 DOCKER_COMPOSE = docker-compose
 DOCKER_APP = template_app_sf # APP container name
+DOCKER_DB = template_db # DB container name
 APP_FOLDER = app
-EXEC = $(DOCKER) exec -w /var/www $(DOCKER_APP)
+EXEC = $(DOCKER) exec -w /var/www/$(APP_FOLDER) $(DOCKER_APP)
+EXEC_WITHOUT_APP_PATH = $(DOCKER) exec -w /var/www/ $(DOCKER_APP)
 PHP = $(EXEC) php
 COMPOSER = $(EXEC) composer
 NPM = $(EXEC) npm
-SYMFONY_CONSOLE = $(PHP) bin/console
+SYMFONY_CONSOLE = $(PHP) app/bin/console
 RM = rm -rf
 
 DOCKER_COMPOSE_FILE = docker-compose.yaml
@@ -17,98 +19,24 @@ DOCKER_COMPOSE_FILE_DEV = docker-compose.dev.yaml
 GREEN = /bin/echo -e "\x1b[32m\#\# $1\x1b[0m"
 RED = /bin/echo -e "\x1b[31m\#\# $1\x1b[0m"
 
-## —— 🔥 App ——
-init: ## Init the project
-	$(MAKE) start
-	$(MAKE) composer-install
-	# $(MAKE) build-jwt-keys
-	@$(call GREEN,"The application is available at: http://localhost:8000.")
+include Makefiles/Makefile.app.mk
+include Makefiles/Makefile.docker.mk
+include Makefiles/Makefile.composer.mk
+include Makefiles/Makefile.symfony.mk
+include Makefiles/Makefile.npm.mk
 
-new-app: ## Create a new Symfony application
-	$(MAKE) config-git
-	$(MAKE) remove-app
-	$(EXEC) symfony new $(APP_FOLDER) --webapp
-
-new-api: ## Create a new Symfony API application
-	$(MAKE) remove-app
-	$(EXEC) symfony new $(APP_FOLDER) --no-git
-
-cache-clear: ## Clear cache
-	$(SYMFONY_CONSOLE) cache:clear
-
-build-jwt-keys: ## Build JWT keys
-	$(SYMFONY_CONSOLE) lexik:jwt:generate-keypair --no-interaction --overwrite
-
-shell: ## Open a shell in the container
-	$(DOCKER) exec -it $(DOCKER_APP) /bin/bash
-
-remove-app: ## Remove the app
-	$(EXEC) $(RM) $(APP_FOLDER)
-
-## —— 🐳 Docker ——
-start: ## Start the project
-	$(DOCKER_COMPOSE) up -d --remove-orphans
-
-start-dev: ## Start the project in dev mode
-	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) -f $(DOCKER_COMPOSE_FILE_DEV) up -d --remove-orphans
-
-start-dev-build: ## Start the project in dev mode and build images
-	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) -f $(DOCKER_COMPOSE_FILE_DEV) up -d --remove-orphans --build
-
-stop: ## Stop the project
-	$(DOCKER_COMPOSE) stop
-
-down: ## Stop and remove the project containers
-	$(DOCKER_COMPOSE) down --remove-orphans
-
-restart: ## Restart the project
-	$(MAKE) down
-	$(MAKE) start
+## —— 🧰 Tools ——
+config-git: ## Configure git
+	$(EXEC) git config --global user.email "docker@localhost"
+	$(EXEC) git config --global user.name "Docker"
 
 ## —— 🧹 Clean ——
-
 clean: ## Clean cache, logs, sessions
 	$(RM) var/cache/* var/logs/* var/sessions/*
 
 clean-all: ## Clean everything (cache, logs, sessions, vendor, node_modules, .env.local)
 	$(RM) var/cache/* var/logs/* var/sessions/* vendor node_modules .env.local
 
-## —— 📦 Composer ——
-
-composer-install: ## Install vendors according to the current composer.lock file
-	$(COMPOSER) install
-
-composer-update: ## Update vendors according to the composer.json file
-	$(COMPOSER) update
-
-composer-require: ## Add a new vendor to the composer.json file
-	$(COMPOSER) require $(filter-out $@,$(MAKECMDGOALS))
-
-composer-require-dev: ## Add a new dev vendor to the composer.json file
-	$(COMPOSER) require --dev $(filter-out $@,$(MAKECMDGOALS))
-
-composer-remove: ## Remove a vendor from the composer.json file
-	$(COMPOSER) remove $(filter-out $@,$(MAKECMDGOALS))
-
-## —— 📦 NPM ——
-
-npm-install: ## Install dependencies according to the current package-lock.json file
-	$(NPM) install
-
-npm-update: ## Update dependencies according to the package.json file
-	$(NPM) update
-
-npm-require: ## Add a new dependency to the package.json file
-	$(NPM) install $(filter-out $@,$(MAKECMDGOALS))
-
-npm-require-dev: ## Add a new dev dependency to the package.json file
-	$(NPM) install --save-dev $(filter-out $@,$(MAKECMDGOALS))
-
-npm-remove: ## Remove a dependency from the package.json file
-	$(NPM) uninstall $(filter-out $@,$(MAKECMDGOALS))
-
-## —— 🧰 Tools ——
-
-config-git: ## Configure git
-	$(EXEC) git config --global user.email "docker@localhost"
-	$(EXEC) git config --global user.name "Docker"
+## —— 🛠️  Others ——
+help: ## List of commands
+	@grep -E '(^[a-zA-Z0-9_-]+:.*?##.*$$)|(^##)' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}{printf "\033[32m%-30s\033[0m %s\n", $$1, $$2}' | sed -e 's/\[32m##/[33m/'

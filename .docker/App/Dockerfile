@@ -7,7 +7,10 @@ RUN apk add --update linux-headers;
 RUN set -ex \
   && apk --no-cache add \
     postgresql-dev \
-    curl
+    curl \
+    npm \ 
+    sudo \
+    postgresql-client
 
 # Install PHP extensions
 RUN docker-php-ext-install pdo pdo_pgsql
@@ -28,4 +31,4 @@ RUN curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.alpine.sh' 
 # Add rights to www-data user on /var/www directory
 RUN chown -R www-data:www-data /var/www
 
-WORKDIR /var/www/
+WORKDIR /var/www/app
