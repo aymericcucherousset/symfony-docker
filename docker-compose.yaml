@@ -1,0 +1,42 @@
+version: '3.3'
+
+services:
+  app:
+    build: 
+      context: ./.docker/App
+    depends_on:
+      - postgresql
+    container_name: ${APP_NAME:-app} # On change, change makefile (DOCKER_APP var)
+    restart: always
+    ports:
+      - '${APP_PORT}:8000'
+    dns:
+      - 8.8.8.8
+    volumes:
+      - ./app:/var/www/
+    command: "symfony server:start"
+    networks:
+      - app-net
+
+  postgresql:
+    image: postgres:${POSTGRES_VERSION:-15}-alpine
+    container_name: postgresql_${APP_NAME:-app}
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      # You should definitely change the password in production
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+    ports:
+      - 5432
+    volumes:
+      - db-data:/var/lib/postgresql/data:rw
+    networks:
+      - app-net
+
+networks:
+  app-net:
+    driver: bridge
+
+volumes:
+  db-data:
