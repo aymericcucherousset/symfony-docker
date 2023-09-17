@@ -4,12 +4,12 @@ DOCKER_COMPOSE = docker-compose
 DOCKER_APP = template_app_sf# APP container name
 DOCKER_DB = template_db# DB container name
 APP_FOLDER = app
-EXEC = $(DOCKER) exec -w /var/www/$(APP_FOLDER) $(DOCKER_APP)
+EXEC = $(DOCKER) exec -it $(DOCKER_APP)
 EXEC_WITHOUT_APP_PATH = $(DOCKER) exec -w /var/www/ $(DOCKER_APP)
 PHP = $(EXEC) php
 COMPOSER = $(EXEC) composer
 NPM = $(EXEC) npm
-SYMFONY_CONSOLE = $(PHP) app/bin/console
+SYMFONY_CONSOLE = $(PHP) bin/console
 RM = rm -rf
 WEB_HTTP_SERVER_PORT=8080# On change, change WEB_HTTP_SERVER_PORT in .env file
 

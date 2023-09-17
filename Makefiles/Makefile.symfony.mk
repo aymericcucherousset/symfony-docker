@@ -2,9 +2,18 @@
 ## —— 🚀 Symfony ——
 sf-console: ## Run a Symfony console command
 	$(SYMFONY_CONSOLE) $(filter-out $@,$(MAKECMDGOALS))
+%:
+	@:
 
 sf: ## Run a Symfony command
-	$(SYMFONY_CONSOLE) $(filter-out $@,$(MAKECMDGOALS))
+	$(MAKE) sf-console $(filter-out $@,$(MAKECMDGOALS))
+%:
+	@:
+
+console: ## Run a Symfony console command
+	$(MAKE) sf-console $(filter-out $@,$(MAKECMDGOALS))
+%:
+	@:
 
 sf-clear-cache: ## Clear cache
 	$(SYMFONY_CONSOLE) cache:clear
