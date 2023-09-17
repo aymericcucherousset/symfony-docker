@@ -6,9 +6,9 @@ init: ## Init the project
 	@$(call GREEN,"The application is available at: http://localhost:8000.")
 
 new-app: ## Create a new Symfony application
+	$(MAKE) remove-app
 	$(MAKE) down
 	$(MAKE) start-dev-build
-	$(MAKE) remove-app
 	$(MAKE) config-git
 	$(EXEC_WITHOUT_APP_PATH) symfony new $(APP_FOLDER) --webapp
 	$(MAKE) composer-install
@@ -35,7 +35,8 @@ shell: ## Open a shell in the container
 	$(DOCKER) exec -it $(DOCKER_APP) /bin/bash
 
 remove-app: ## Remove the app
-	$(EXEC) $(RM) $(APP_FOLDER)
+	$(MAKE) start
+	$(EXEC_WITHOUT_APP_PATH) $(RM) $(APP_FOLDER)
 
 app: ## Command of the app container
 	$(SYMFONY_CONSOLE) $(filter-out $@,$(MAKECMDGOALS))
