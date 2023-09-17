@@ -1,8 +1,8 @@
 # Variables
 DOCKER = docker
 DOCKER_COMPOSE = docker-compose
-DOCKER_APP = template_app_sf # APP container name
-DOCKER_DB = template_db # DB container name
+DOCKER_APP = template_app_sf# APP container name
+DOCKER_DB = template_db# DB container name
 APP_FOLDER = app
 EXEC = $(DOCKER) exec -w /var/www/$(APP_FOLDER) $(DOCKER_APP)
 EXEC_WITHOUT_APP_PATH = $(DOCKER) exec -w /var/www/ $(DOCKER_APP)
@@ -11,6 +11,7 @@ COMPOSER = $(EXEC) composer
 NPM = $(EXEC) npm
 SYMFONY_CONSOLE = $(PHP) app/bin/console
 RM = rm -rf
+WEB_HTTP_SERVER_PORT=8080# On change, change WEB_HTTP_SERVER_PORT in .env file
 
 DOCKER_COMPOSE_FILE = docker-compose.yaml
 DOCKER_COMPOSE_FILE_DEV = docker-compose.dev.yaml
@@ -29,6 +30,9 @@ include Makefiles/Makefile.npm.mk
 config-git: ## Configure git
 	$(EXEC) git config --global user.email "docker@localhost"
 	$(EXEC) git config --global user.name "Docker"
+
+configure-database-url: ## Configure DATABASE_URL in .env file (Change the host(127.0.0.1) by the db name in docker (DOCKER_DB)
+	$(EXEC) sed -i 's/127.0.0.1/$(DOCKER_DB)/g' .env
 
 ## —— 🧹 Clean ——
 clean: ## Clean cache, logs, sessions

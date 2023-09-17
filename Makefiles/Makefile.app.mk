@@ -16,7 +16,9 @@ new-app: ## Create a new Symfony application
 	$(MAKE) npm-install
 	$(MAKE) npm-add-defaults-scripts
 	$(MAKE) npm-build
-	@$(call GREEN,"Change the database host in DATABASE_URL in the .env file by $(DOCKER_DB).")
+	$(MAKE) configure-database-url
+	@$(call RED,"Please change your credentials in the .env file.")
+	@$(call GREEN,"The application is available at http://localhost:$(WEB_HTTP_SERVER_PORT).")
 
 new-api: ## Create a new Symfony API application
 	$(MAKE) down
