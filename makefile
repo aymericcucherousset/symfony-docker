@@ -2,6 +2,7 @@
 DOCKER = docker
 DOCKER_COMPOSE = docker-compose
 DOCKER_APP = template_app_sf # APP container name
+APP_FOLDER = app
 EXEC = $(DOCKER) exec -w /var/www $(DOCKER_APP)
 PHP = $(EXEC) php
 COMPOSER = $(EXEC) composer
@@ -24,10 +25,13 @@ init: ## Init the project
 	@$(call GREEN,"The application is available at: http://localhost:8000.")
 
 new-app: ## Create a new Symfony application
-	$(EXEC) symfony new app --webapp
+	$(MAKE) config-git
+	$(MAKE) remove-app
+	$(EXEC) symfony new $(APP_FOLDER) --webapp
 
 new-api: ## Create a new Symfony API application
-	$(EXEC) symfony new app --no-git
+	$(MAKE) remove-app
+	$(EXEC) symfony new $(APP_FOLDER) --no-git
 
 cache-clear: ## Clear cache
 	$(SYMFONY_CONSOLE) cache:clear
@@ -39,7 +43,7 @@ shell: ## Open a shell in the container
 	$(DOCKER) exec -it $(DOCKER_APP) /bin/bash
 
 remove-app: ## Remove the app
-	$(RM) app
+	$(EXEC) $(RM) $(APP_FOLDER)
 
 ## —— 🐳 Docker ——
 start: ## Start the project
@@ -103,3 +107,8 @@ npm-require-dev: ## Add a new dev dependency to the package.json file
 npm-remove: ## Remove a dependency from the package.json file
 	$(NPM) uninstall $(filter-out $@,$(MAKECMDGOALS))
 
+## —— 🧰 Tools ——
+
+config-git: ## Configure git
+	$(EXEC) git config --global user.email "docker@localhost"
+	$(EXEC) git config --global user.name "Docker"
