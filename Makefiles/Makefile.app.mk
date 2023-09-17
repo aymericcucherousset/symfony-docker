@@ -35,6 +35,10 @@ new-api: ## Create a new Symfony API application
 
 cache-clear: ## Clear cache
 	$(SYMFONY_CONSOLE) cache:clear
+	$(NPM) cache clean --force
+
+cc: ## Clear cache
+	$(MAKE) cache-clear
 
 build-jwt-keys: ## Build JWT keys
 	$(SYMFONY_CONSOLE) lexik:jwt:generate-keypair --no-interaction --overwrite
