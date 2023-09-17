@@ -1,10 +1,4 @@
 ## —— 🔥 App ——
-init: ## Init the project
-	$(MAKE) start
-	$(MAKE) composer-install
-	# $(MAKE) build-jwt-keys
-	@$(call GREEN,"The application is available at: http://localhost:8000.")
-
 new-app: ## Create a new Symfony application
 	$(MAKE) remove-app
 	$(MAKE) down
@@ -18,6 +12,18 @@ new-app: ## Create a new Symfony application
 	$(MAKE) npm-build
 	$(MAKE) configure-database-url
 	@$(call RED,"Please change your credentials in the .env file.")
+	@$(call GREEN,"The application is available at http://localhost:$(WEB_HTTP_SERVER_PORT).")
+
+start-app: ## start the project
+	$(MAKE) start
+	$(MAKE) composer-install
+	$(MAKE) npm-install
+	@$(call GREEN,"The application is available at http://localhost:$(WEB_HTTP_SERVER_PORT).")
+
+start-app-dev: ## start the project
+	$(MAKE) start-dev-build
+	$(MAKE) composer-install
+	$(MAKE) npm-install
 	@$(call GREEN,"The application is available at http://localhost:$(WEB_HTTP_SERVER_PORT).")
 
 new-api: ## Create a new Symfony API application
